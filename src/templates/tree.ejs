@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree View - <%= repoName || 'Repository' %></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .folder {
+            color: #333;
+            font-weight: bold;
+        }
+        .folder::before {
+            content: '📁 ';
+        }
+        .file::before {
+            content: '📄 ';
+        }
+    </style>
+</head>
+<body>
+    <h1>Repository: <%= repoName || 'Repository' %></h1>
+    <ul>
+        <%- renderTree(tree) %>
+    </ul>
+</body>
+</html>
+
+<%
+function renderTree(nodes) {
+    if (!nodes || nodes.length === 0) return '';
+    
+    let html = '';
+    
+    nodes.forEach(function(node) {
+        const fileInfo = node[0];
+        const children = node[1] || [];
+        
+        if (fileInfo.isDirectory) {
+            html += '<li>';
+            html += '<a href="' + fileInfo.path.replace(repoName, '') + '" class="folder">' + fileInfo.name + '</a>';
+            if (children.length > 0) {
+                html += '<ul>';
+                html += renderTree(children);
+                html += '</ul>';
+            }
+            html += '</li>';
+        } else {
+            html += '<li>';
+            html += '<a href="' + fileInfo.path.replace(repoName, '') + '" class="file">' + fileInfo.name + '</a>';
+            html += '</li>';
+        }
+    });
+    
+    return html;
+}
+%>
