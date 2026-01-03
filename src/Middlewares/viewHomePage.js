@@ -8,6 +8,7 @@ import { HomePage } from "../page.js";
  */
 export const viewHomePage = async (req, res, next) => {
   const { folder: folderId } = parseCookies(req.headers.cookie || "");
+  console.log("Cookie folder ID:", folderId);
 
   if (folderId) return next();
 

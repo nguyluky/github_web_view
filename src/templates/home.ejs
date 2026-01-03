@@ -1,185 +1,358 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Easily view HTML, CSS, and JS files from GitHub repositories with our web application." />
-    <meta name="keywords" content="GitHub, repository viewer, HTML, CSS, JavaScript" />
-    <meta name="author" content="Your Name" />
-    <title>GitHub Page Viewer - View Repositories Easily</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f6f8fa;
-        color: #24292e;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      }
-      .github-link {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 24px;
-      }
-      .github-link a {
-        color: #24292e;
-        text-decoration: none;
-      }
-      .contenter {
-        background: white;
-        padding: 40px;
-        border-radius: 6px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        max-width: 600px;
-        width: 100%;
-        text-align: center;
-      }
-      h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
-      }
-      p {
-        margin-bottom: 15px;
-        line-height: 1.5;
-      }
-      form {
-        margin-top: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      label {
-        font-weight: 600;
-        margin-bottom: 10px;
-        display: block;
-        text-align: left;
-        width: 100%;
-      }
-      input[type="text"] {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border: 1px solid #e1e4e8;
-        border-radius: 6px;
-        box-sizing: border-box;
-        font-size: 16px;
-      }
-      button {
-        background-color: #2ea44f;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-      button:hover {
-        background-color: #2c974b;
-      }
-      .shortcuts-history {
-        margin-top: 40px;
-        text-align: left;
-        border-top: 1px solid #e1e4e8;
-        padding-top: 20px;
-      }
-      .shortcuts-history h2 {
-        font-size: 18px;
-        margin-bottom: 10px;
-      }
-      code {
-        background-color: #f6f8fa;
-        padding: 2px 4px;
-        border-radius: 3px;
-        font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
-      }
-    </style>
-  </head>
-  <body>
-    <header class="github-link">
-      <a href="https://github.com" target="_blank" title="Visit GitHub">
-        <i class="fab fa-github"></i>
-      </a>
-    </header>
-
-    <main class="contenter">
-      <h1>Welcome to GitHub Page Viewer</h1>
-      <p>
-        This web application allows you to easily view HTML, CSS, and JS files
-        from GitHub repositories.
-      </p>
-      <p>
-        To get started, enter the GitHub repository URL in the input field
-        provided.
-      </p>
-      <p>
-        All pages will be deleted after 24 hours of inactivity to save server space.
-      </p>
-
-      <form action="/" method="get" onsubmit="return onsubmit(event);">
-        <label for="repoUrl">GitHub Repository URL:</label>
-        <input
-          type="text"
-          id="repo"
-          name="repo"
-          placeholder="https://github.com/username/repository"
-          required
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Easily view HTML, CSS, and JS files from GitHub repositories with our web application."
         />
-        <button type="submit">View Repository (<%= count %> less today)</button>
-      </form>
+        <meta name="keywords" content="GitHub, repository viewer, HTML, CSS, JavaScript" />
+        <meta name="author" content="Your Name" />
+        <title>GitHub Page Viewer - View Repositories Easily</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <style>
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+                    sans-serif;
+                background-color: #f6f8fa;
+                color: #24292e;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
 
-      <section class="shortcuts-history">
-        <div>
-          <h2>Shortcuts</h2>
-          <div><code>ESC</code>: Close view back to home page</div>
-        </div>
-      </section>
-    </main>
+            .github-link {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                font-size: 24px;
+            }
 
-    <script>
-      function select(path) {
-        document.cookie = "folder=" + path + "; path=/";
-        window.location.reload();
-      }
+            .github-link a {
+                color: #24292e;
+                text-decoration: none;
+            }
 
-      function onsubmit(event) {
-        event.preventDefault();
-        const repoUrl = document.getElementById("repo").value;
-        location.href = "?repo=" + encodeURIComponent(repoUrl);
-      }
+            .contenter {
+                background: white;
+                padding: 40px;
+                border-radius: 6px;
+                box-shadow:
+                    0 1px 3px rgba(0, 0, 0, 0.12),
+                    0 1px 2px rgba(0, 0, 0, 0.24);
+                max-width: 600px;
+                width: 100%;
+                text-align: center;
+            }
 
-      // load history
-      const history = JSON.parse(localStorage.getItem("history") || "[]");
-      if (history.length > 0) {
-        const historyContainer = document.createElement("div");
-        historyContainer.innerHTML = `
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            p {
+                margin-bottom: 15px;
+                line-height: 1.5;
+            }
+
+            form {
+                margin-top: 30px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            label {
+                font-weight: 600;
+                margin-bottom: 10px;
+                display: block;
+                text-align: left;
+                width: 100%;
+            }
+
+            input[type='text'] {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #e1e4e8;
+                border-radius: 6px;
+                box-sizing: border-box;
+                font-size: 16px;
+            }
+
+            button {
+                background-color: #2ea44f;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.2s;
+                width: 100%;
+            }
+
+            button:hover {
+                background-color: #2c974b;
+            }
+
+            .shortcuts-history {
+                margin-top: 40px;
+                text-align: left;
+                border-top: 1px solid #e1e4e8;
+                padding-top: 20px;
+            }
+
+            .shortcuts-history h2 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            code {
+                background-color: #f6f8fa;
+                padding: 2px 4px;
+                border-radius: 3px;
+                font-family:
+                    ui-monospace,
+                    SFMono-Regular,
+                    SF Mono,
+                    Menlo,
+                    Consolas,
+                    Liberation Mono,
+                    monospace;
+            }
+
+            #btnProgress {
+                position: relative;
+                overflow: hidden;
+            }
+
+            #progressBar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 0;
+                background-color: rgba(99, 99, 99, 0.3);
+                transition: width 0.3s;
+            }
+
+            #textProgress {
+                position: relative;
+                z-index: 2;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header class="github-link">
+            <a href="https://github.com" target="_blank" title="Visit GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </header>
+
+        <main class="contenter">
+            <h1>Welcome to GitHub Page Viewer</h1>
+            <p>
+                This web application allows you to easily view HTML, CSS, and JS files from GitHub
+                repositories.
+            </p>
+            <p>To get started, enter the GitHub repository URL in the input field provided.</p>
+            <p>All pages will be deleted after 24 hours of inactivity to save server space.</p>
+
+            <form id="repoForm">
+                <label for="repoUrl">GitHub Repository URL:</label>
+                <input
+                    type="text"
+                    id="repo"
+                    name="repo"
+                    placeholder="https://github.com/username/repository"
+                    required
+                />
+                <!-- <button type="submit">View Repository (<%= count %> less today)</button> -->
+                <button id="btnProgress" class="btn-pure-fill">
+                    <div class="progress-bar-pure" id="progressBar"></div>
+                    <div class="content-pure">
+                        <span id="textProgress">
+                            View Repository
+                        </span>
+                    </div>
+                </button>
+            </form>
+
+            <section class="shortcuts-history">
+                <div>
+                    <h2>Shortcuts</h2>
+                    <div><code>ESC</code>: Close view back to home page</div>
+                </div>
+            </section>
+        </main>
+
+        <script>
+            /**
+             * event type:
+             *
+             * C -> S: clone:<repo_url> - request to clone repo
+             * S -> C loading:<number> - loading progress
+             * S -> C clone_complete:<folder_id> - clone complete
+             * S -> C error:<message> - error occurred
+             *
+             * C: set cookie "folder" to folder_id
+             *
+             */
+
+            const webSocketUrl =
+                (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
+
+            const ws = new WebSocket(webSocketUrl);
+
+            ws.onopen = () => {
+                console.log('WebSocket connection established.');
+                ws.send('init');
+            };
+
+
+            ws.addEventListener('message', (event) => {
+                const data = event.data;
+                if (data.startsWith('loading:')) {
+                    const progress = parseInt(data.split(':')[1], 10);
+                    const progressBar = document.getElementById('progressBar');
+                    progressBar.style.width = progress + '%';
+
+                    const textProgress = document.getElementById('textProgress');
+                    textProgress.innerText = `Cloning... ${progress}%`;
+                }
+
+                else if (data.startsWith('clone_complete:')) {
+                    const folderId = data.split(':')[1];
+
+                    setCookie('folder', folderId, 1); // 1 day expiration
+
+                    addToHistory(
+                        document.getElementById('repo').value,
+                        folderId
+                    );
+
+                    window.location.href = '/';
+                }
+
+
+            });
+
+            document.getElementById('repoForm').onsubmit = onsubmit;
+
+            function onsubmit(event) {
+                event.preventDefault();
+                const repoUrl = document.getElementById('repo').value.trim();
+                if (repoUrl) {
+                    ws.send('clone:' + repoUrl);
+
+                    // disable button
+                    const btn = document.getElementById('btnProgress');
+                    btn.disabled = true;
+
+                    const textProgress = document.getElementById('textProgress');
+                    textProgress.innerText = 'Cloning... 0%';
+
+                }
+                return false;
+            }
+
+
+
+            function setCookie(name, value, days) {
+                const d = new Date();
+                d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+                const expires = 'expires=' + d.toUTCString();
+                document.cookie = name + '=' + value + ';' + expires + ';path=/';
+            }
+
+
+
+
+            /**
+             * 
+             * @returns {{
+             *  url: string,
+             *  path: string,
+             *  date: string
+             * }[]}
+             * 
+             */
+            function getHistory() {
+                const data = JSON.parse(localStorage.getItem('history') || '[]');
+
+                // filter 24 hours
+                const now = new Date();
+                const filteredHistory = data.filter((item) => {
+                    const itemDate = new Date(item.date);
+                    const diff = now - itemDate;
+                    return diff <= 24 * 60 * 60 * 1000;
+                });
+                return filteredHistory;
+            }
+
+            function addToHistory(url, path) {
+                const history = getHistory();
+
+                history.unshift({
+                    url,
+                    path,
+                    date: new Date().toISOString(),
+                });
+
+                // filter 24 hours
+                const now = new Date();
+                const filteredHistory = history.filter((item) => {
+                    const itemDate = new Date(item.date);
+                    const diff = now - itemDate;
+                    return diff <= 24 * 60 * 60 * 1000;
+                });
+
+                localStorage.setItem('history', JSON.stringify(filteredHistory));
+            }
+
+            // TODO:
+
+            // load history
+            const history = getHistory();
+            if (history.length > 0) {
+                const historyContainer = document.createElement('div');
+                historyContainer.innerHTML = `
           <h2>Recent Repositories</h2>
         `;
-        history.forEach((item) => {
-          const repoDiv = document.createElement("div");
-          repoDiv.style.marginBottom = "10px";
-          const link = document.createElement("a");
-          link.href = "#";
-          link.innerText = item.url;
-          link.onclick = () => select(item.path);
-          const dateSpan = document.createElement("span");
-          dateSpan.style.marginLeft = "10px";
-          dateSpan.style.color = "#586069";
-          const date = new Date(item.date);
-          dateSpan.innerText = `(${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
-          repoDiv.appendChild(link);
-          repoDiv.appendChild(dateSpan);
-          historyContainer.appendChild(repoDiv);
-        });
-        document
-          .querySelector(".shortcuts-history")
-          .appendChild(historyContainer);
-      }
-    </script>
-  </body>
+                history.forEach((item) => {
+                    const repoDiv = document.createElement('div');
+                    repoDiv.style.marginBottom = '10px';
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.innerText = item.url;
+
+                    link.onclick = () => {
+                        setCookie('folder', item.path, 1); // 1 day expiration
+                        window.location.href = '/';
+                        return false;
+                    };
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.style.marginLeft = '10px';
+                    dateSpan.style.color = '#586069';
+                    const date = new Date(item.date);
+                    dateSpan.innerText = `(${date.toLocaleDateString()} ${date.toLocaleTimeString()})`;
+                    repoDiv.appendChild(link);
+                    repoDiv.appendChild(dateSpan);
+                    historyContainer.appendChild(repoDiv);
+                });
+                document.querySelector('.shortcuts-history').appendChild(historyContainer);
+            }
+        </script>
+    </body>
 </html>

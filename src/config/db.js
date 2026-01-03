@@ -1,8 +1,8 @@
+import fs from "fs";
 import { open } from "lmdb";
 import cron from "node-cron";
-import { timeOffline } from "./constant.js";
 import path from "node:path";
-import fs from "fs";
+import { timeOffline } from "./constant.js";
 
 /**
  * @type {import("lmdb").Database<any, string>}
@@ -66,6 +66,15 @@ export const Service = {
    */
   getFolderData: async (folderID) => {
     return await DB.get("folders:" + folderID);
+  },
+
+
+  /**
+   * 
+   * @param {string} folderID 
+   */
+  deleteFolderData: async (folderID) => {
+    await DB.remove("folders:" + folderID);
   }
 };
 

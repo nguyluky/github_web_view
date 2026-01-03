@@ -1,7 +1,11 @@
-import { exec, spawn } from "child_process";
+import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import readline from "readline";
+import simpleGit from "simple-git";
+import unzupper from "unzipper";
+
+
 /**
  *
  * @param {string} cookieHeader
@@ -34,11 +38,11 @@ export function parseCookies(cookieHeader) {
  *
  * @param {string} fileId
  * @param {string} destPath
- * @param {(mess: string) => void} cb
+ * @param {(process: number) => void} processCb
+ * @param {() => void} doneCb
  */
-export async function dowGoogleDriveFile(fileId, destPath, cb) {
+export async function dowGoogleDriveFile(fileId, destPath, processCb, doneCb) {
     console.log("Downloading Google Drive file:", fileId);
-    cb("Starting download...");
     const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId.trim()}`;
     const res = await fetch(downloadUrl);
 
@@ -55,15 +59,15 @@ export async function dowGoogleDriveFile(fileId, destPath, cb) {
                 write(chunk) {
                     fileStream.write(chunk);
                     downloaded += chunk.length;
-                    if (cb) {
-                        cb(
-                            `Downloaded ${((downloaded / contextLength) * 100).toFixed(2)}%`
-                        );
+
+                    if (processCb && contextLength) {
+                        const progress = (downloaded / contextLength) * 50;
+                        processCb(progress);
                     }
+                    // nếu không có content-length thì sao
                 },
                 close() {
                     fileStream.end();
-                    cb("Download complete");
                     resolve("");
                 },
                 abort(err) {
@@ -75,24 +79,49 @@ export async function dowGoogleDriveFile(fileId, destPath, cb) {
 
 
     await new Promise((r) => setTimeout(r, 1000)); // đợi 1 giây trước khi giải nén
-    cb("Unzipping file...");
     // giải nén file zip
     const zipPath = path.resolve(destPath + ".zip");
     const tem_destPath = path.resolve(destPath + "_dir");
-    console.log("Unzipping file:", zipPath);
-    await new Promise((resolve, reject) => {
-        exec(`unzip -o ${zipPath} -d ${tem_destPath}`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error unzipping file: ${error}`);
-                return reject(error);
-            }
-            console.log(`File unzipped: ${stdout}`);
-            resolve("");
-        });
-    });
+    // console.log("Unzipping file:", zipPath);
+    // await new Promise((resolve, reject) => {
+    //     exec(`unzip -o ${zipPath} -d ${tem_destPath}`, (error, stdout, stderr) => {
+    //         if (error) {
+    //             console.error(`Error unzipping file: ${error}`);
+    //             return reject(error);
+    //         }
+    //         console.log(`File unzipped: ${stdout}`);
+    //         resolve("");
+    //     });
+    // });
+
+    const stats = fs.statSync(zipPath);
+    const totalSize = stats.size;
+    let completedSize = 0;
+
+    await fs.createReadStream(zipPath)
+    .on('data', (chunk) => {
+        completedSize += chunk.length;
+        if (processCb) {
+            const progress = 50 + (completedSize / totalSize) * 30; // từ 50% đến 80%
+            processCb(progress);
+        }
+    })
+    .pipe(unzupper.Extract({ path: tem_destPath }))
+    .promise();
+
+    if (processCb) {
+        processCb(80);
+    }
+
+    await new Promise((r) => setTimeout(r, 500)); // đợi nửa giây trước khi tìm thư mục gốc
+
+    if (processCb) {
+        processCb(90);
+    }
 
     // xoá file zip
     fs.unlinkSync(destPath + ".zip");
+
 
     // tìm thư mục gốc
     /**
@@ -120,15 +149,24 @@ export async function dowGoogleDriveFile(fileId, destPath, cb) {
         return null;
     };
 
+    if (processCb) {
+        processCb(95);
+    }
+
     const rootFolder = findRootFolder(`${destPath}_dir`);
     if (rootFolder) {
         // di chuyển thư mục gốc ra destPath
         fs.renameSync(rootFolder, destPath);
         // xoá thư mục tạm
         fs.rmdirSync(`${destPath}_dir`, { recursive: true });
-        cb("File ready");
+        if (processCb) {
+            processCb(100);
+        }
+        if (doneCb) {
+            doneCb();
+        }
     } else {
-        cb("Root folder not found");
+        throw new Error("Root folder not found in the unzipped content");
     }
 }
 
@@ -178,15 +216,16 @@ export async function cloneGitRepo(link, folderPath, cb) {
  * 
  * @param {string} url 
  * @param {string} destPath 
- * @param {(mess: string) => void} cb 
+ * @param {(progress: number) => void} psCb
+ * @param {() => void} donCb
  */
-export async function handleDownload(url, destPath, cb) {
+export async function handleDownload(url, destPath, psCb, donCb) {
     console.log("Handling download for URL:", url, "to", destPath);
     if (url.includes("drive.google.com")) {
         const fileId = url.split("/d/")[1].split("/")[0];
-        await dowGoogleDriveFile(fileId, destPath, cb);
+        await dowGoogleDriveFile(fileId, destPath, psCb, donCb);
     } else if (url.startsWith("http") || url.startsWith("git@")) {
-        await cloneGitRepo(url, destPath, cb);
+        await cloneWithProgress(url, destPath, psCb, donCb);
     } else {
         throw new Error("Unsupported URL");
     }
@@ -273,4 +312,48 @@ export function buildFileTree(dirPath, basePath) {
         },
         children
     ];
+}
+
+
+/**
+ * 
+ * @param {string} link 
+ * @param {string} folderPath 
+ * @param {(process: number) => void} processCb
+ * @param {() => void} doneCb 
+ */
+export async function cloneWithProgress(link, folderPath, processCb, doneCb) {
+
+    const generated = simpleGit({
+        progress: ({ stage, progress }) => {
+            // method: 'clone', 'fetch', 'pull', 'push'
+            // The type of progress being reported, note that any one task may emit many stages - for example git clone emits both receiving and resolving
+            // progress: percentage (0-100)
+            if (processCb) {
+                let adjustedProgress = progress;
+                if (stage === 'resolving') {
+                    adjustedProgress = 50 + (progress / 2); // from 50% to 100%
+                } else if (stage === 'receiving') {
+                    adjustedProgress = progress / 2; // from 0% to 50%
+                }
+                processCb(adjustedProgress);
+            }
+        }
+    });
+
+    // clone if exits folderPath then skip
+    if (fs.existsSync(folderPath)) {
+        if (processCb) {
+            processCb(100);
+        }
+        if (doneCb) {
+            doneCb();
+        }
+        return;
+    }
+    await generated.clone(link, folderPath, );
+
+    if (doneCb) {
+        doneCb();
+    }
 }

@@ -22,12 +22,21 @@ export const githubRepoView = async (req, res, next) => {
         return res.redirect("/");
     }
 
+
+
     const decodedPath = decodeURIComponent(req.path);
     const projectPath = path.join(".cache", folder, decodedPath);
 
     // Security: Prevent directory traversal attacks
     const safePath = path.resolve(projectPath);
     const baseDir = path.resolve(".cache", folder);
+
+    // check if baseDir exists
+    if (!fs.existsSync(baseDir)) {
+        res.clearCookie("folder");
+        await Service.deleteFolderData(folderId);
+        return res.redirect("/");
+    }
 
     if (!safePath.startsWith(baseDir)) {
         return res.status(403).send(
